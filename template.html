@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Study Notes</title>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  template.html — SHELL ONLY. Do not add content here.       ║
+  ║  To add modules: create modules/course-topic.md             ║
+  ║  To rebuild:     python build.py  →  study-notes.html       ║
+  ║  Six build markers in the body are replaced by build.py.    ║
+  ╚══════════════════════════════════════════════════════════════╝
+  FONTS: System fonts only — works fully offline.
+    Display → Palatino Linotype / Georgia (serif)
+    Body    → Segoe UI / system-ui / Arial (sans-serif)
+    Mono    → Cascadia Code / Consolas / Courier New
+-->
+<style>
+/* ═══════════════════════════════ TOKENS ═══════════════════════════════ */
+:root {
+  /* Core palette */
+  --navy:     #1b2a4a;
+  --navy-mid: #253659;
+  --gold:     #c9933a;
+  --gold-lt:  #e8b76a;
+  --cream:    #f7f2eb;
+  --cream-dk: #ece6dc;
+  --white:    #ffffff;
+  --text:     #2c2c2c;
+  --muted:    #6b7280;
+
+  /* Section accent colours — used consistently across all courses */
+  --c-blue:   #2a5f9b;   /* definitions */
+  --c-green:  #2d7a5f;   /* processes / functions */
+  --c-gold-s: #b45309;   /* steps / examples */
+  --c-rose:   #9b3a4a;   /* skills / warnings */
+  --c-purple: #5a3a8a;   /* structure / hierarchy */
+  --c-teal:   #2a8a80;   /* why / rationale */
+  --c-orange: #b85c20;   /* types / categories */
+  --c-slate:  #3a5068;   /* summary / reference */
+
+  --sw: 276px;
+  --r:  10px;
+  --font-d: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --font-b: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, 'Helvetica Neue', Arial, sans-serif;
+  --font-m: ui-monospace, 'Cascadia Code', 'SF Mono', Consolas, 'Courier New', monospace;
+}
+
+/* ═══════════════════════════════ RESET ═══════════════════════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:var(--font-b); background:var(--cream); color:var(--text); display:flex; min-height:100vh; font-size:16px; line-height:1.7; }
+a { color:inherit; text-decoration:none; }
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(27,42,74,.2); border-radius:3px; }
+
+/* ═══════════════════════════════ SIDEBAR ═══════════════════════════════ */
+#sidebar { width:var(--sw); height:100vh; background:var(--navy); position:fixed; top:0; left:0; display:flex; flex-direction:column; z-index:100; overflow:hidden; transition:transform .3s ease; }
+.sb-head { padding:24px 18px 16px; border-bottom:1px solid rgba(255,255,255,.08); flex-shrink:0; }
+.sb-logo { font-family:var(--font-d); font-size:1.2rem; color:var(--gold-lt); line-height:1.3; }
+.sb-tag  { font-size:.7rem; color:rgba(255,255,255,.32); margin-top:3px; text-transform:uppercase; letter-spacing:.08em; }
+.sb-search { padding:11px 14px; border-bottom:1px solid rgba(255,255,255,.08); flex-shrink:0; }
+.sb-body { flex:1; overflow-y:scroll; scrollbar-width:thin; }
+.sb-search input { width:100%; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:6px; padding:7px 10px; color:#fff; font-family:var(--font-b); font-size:.82rem; outline:none; }
+.sb-search input::placeholder { color:rgba(255,255,255,.28); }
+.sb-search input:focus { border-color:var(--gold); }
+.sb-sec { padding:12px 0 4px; }
+.sb-lbl { padding:4px 18px; font-size:.65rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); display:flex; align-items:center; gap:7px; }
+.sb-lbl::after { content:''; flex:1; height:1px; background:rgba(201,147,58,.2); }
+.sb-links { padding:0 6px 2px; }
+.sb-link { display:flex; align-items:center; gap:8px; padding:7px 11px; border-radius:6px; color:rgba(255,255,255,.58); font-size:.83rem; cursor:pointer; transition:all .16s; user-select:none; }
+.sb-link:hover { background:rgba(255,255,255,.09); color:#fff; }
+.sb-link.active { background:rgba(255,255,255,.11); color:var(--gold-lt); font-weight:600; }
+.sb-dot { width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.42; flex-shrink:0; }
+.sb-link.active .sb-dot { opacity:1; background:var(--gold); }
+.sb-link.ind { padding-left:24px; font-size:.81rem; }
+.sb-link.sub { padding-left:34px; font-size:.76rem; color:rgba(255,255,255,.4); }
+.sb-add { margin:3px 12px; border:1px dashed rgba(255,255,255,.16); border-radius:6px; padding:7px; text-align:center; font-size:.74rem; color:rgba(255,255,255,.26); cursor:pointer; transition:all .2s; }
+.sb-add:hover { border-color:var(--gold); color:var(--gold); }
+.sb-footer { margin-top:auto; padding:10px 6px 18px; border-top:1px solid rgba(255,255,255,.07); }
+.sb-github { display:flex; align-items:center; gap:7px; padding:6px 12px; color:rgba(255,255,255,.36); font-size:.68rem; text-decoration:none; transition:color .18s; }
+.sb-github:hover { color:var(--gold-lt); }
+.sb-github svg { flex-shrink:0; opacity:.6; }
+/* Collapsible course groups */
+.sb-course { border-top:1px solid rgba(255,255,255,.06); }
+.sb-course-toggle { display:flex; align-items:center; gap:6px; padding:10px 18px 8px; cursor:pointer; user-select:none; transition:background .15s; }
+.sb-course-toggle:hover { background:rgba(255,255,255,.05); }
+.sb-course-name { font-size:.65rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); flex:1; }
+.sb-caret { font-size:.7rem; color:rgba(201,147,58,.55); transition:transform .2s; line-height:1; }
+.sb-course.collapsed .sb-caret { transform:rotate(-90deg); }
+.sb-course.collapsed .sb-links { display:none; }
+
+/* ═══════════════════════════════ TOPBAR ═══════════════════════════════ */
+#main { margin-left:var(--sw); flex:1; }
+#topbar { background:var(--white); border-bottom:1px solid var(--cream-dk); padding:13px 36px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; gap:12px; }
+.bc { font-size:.79rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bc b { color:var(--navy); }
+.tb-modes { display:flex; gap:7px; flex-shrink:0; }
+.tb-btn { padding:5px 13px; border-radius:20px; border:1.5px solid rgba(27,42,74,.28); background:transparent; color:var(--navy); font-family:var(--font-b); font-size:.77rem; font-weight:600; cursor:pointer; transition:all .17s; white-space:nowrap; }
+.tb-btn:hover { background:var(--cream); border-color:var(--navy); }
+.tb-btn.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+.hamburger { display:none; position:fixed; top:10px; left:10px; z-index:200; background:var(--navy); color:#fff; border:none; border-radius:7px; width:37px; height:37px; font-size:.95rem; cursor:pointer; align-items:center; justify-content:center; }
+
+/* ═══════════════════════════════ PAGES ═══════════════════════════════ */
+.page { display:none; }
+.page.on { display:block; }
+.pg { padding:34px 36px 80px; max-width:1100px; margin:0 auto; }
+
+/* ═══════════════════════════════ HERO BANNER ═══════════════════════════════ */
+.hero { background:linear-gradient(130deg,var(--navy) 0%,#253a5e 55%,#1f3d6b 100%); border-radius:var(--r); padding:32px 36px; margin-bottom:30px; position:relative; overflow:hidden; }
+.hero::before { content:''; position:absolute; top:-50px; right:-50px; width:220px; height:220px; border-radius:50%; background:rgba(201,147,58,.07); }
+.hero-tag { display:inline-block; background:rgba(201,147,58,.18); color:var(--gold-lt); padding:3px 10px; border-radius:20px; font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-bottom:9px; }
+.hero h1 { font-family:var(--font-d); color:#fff; font-size:1.85rem; line-height:1.25; margin-bottom:7px; }
+.hero p { color:rgba(255,255,255,.6); font-size:.9rem; max-width:500px; }
+.hero-pills { display:flex; flex-wrap:wrap; gap:6px; margin-top:16px; }
+.hero-pill { background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.14); color:rgba(255,255,255,.7); padding:3px 10px; border-radius:20px; font-size:.74rem; cursor:pointer; transition:all .16s; }
+.hero-pill[data-sec]:hover { background:rgba(201,147,58,.28); border-color:var(--gold-lt); color:#fff; }
+
+/* Mindmap tooltip */
+#mm-tip { position:fixed; background:var(--navy); color:#fff; border:1px solid rgba(201,147,58,.4); border-radius:8px; padding:10px 13px; font-size:.78rem; max-width:220px; line-height:1.55; pointer-events:none; z-index:500; display:none; box-shadow:0 4px 14px rgba(0,0,0,.3); }
+#mm-tip .tip-head { font-weight:700; color:var(--gold-lt); margin-bottom:4px; font-size:.76rem; }
+#mm-tip .tip-body { color:rgba(255,255,255,.75); }
+
+/* ═══════════════════════════════ NOTE SECTIONS ═══════════════════════════════ */
+.sec { margin-bottom:24px; background:var(--white); border-radius:var(--r); border:1px solid var(--cream-dk); overflow:hidden; transition:box-shadow .25s; }
+.sec.flash { animation:flashBorder .55s ease 2; }
+@keyframes flashBorder { 0%,100%{box-shadow:0 0 0 0 rgba(201,147,58,0)} 50%{box-shadow:0 0 0 4px rgba(201,147,58,.52)} }
+.sec-hd { padding:15px 20px; display:flex; align-items:center; gap:11px; cursor:pointer; user-select:none; border-bottom:1px solid var(--cream-dk); transition:background .13s; }
+.sec-hd:hover { background:var(--cream); }
+.sec-ico { width:32px; height:32px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:.88rem; flex-shrink:0; }
+.ico-blue   { background:#dbeafe; }
+.ico-green  { background:#d1fae5; }
+.ico-gold   { background:#fef3c7; }
+.ico-rose   { background:#ffe4e6; }
+.ico-purple { background:#ede9fe; }
+.ico-teal   { background:#ccfbf1; }
+.ico-orange { background:#ffedd5; }
+.ico-slate  { background:#e2e8f0; }
+.sec-title { font-weight:700; font-size:.93rem; color:var(--navy); flex:1; }
+.sec-num { font-family:var(--font-m); font-size:.68rem; color:var(--muted); background:var(--cream-dk); padding:2px 7px; border-radius:4px; }
+.chevron { color:var(--muted); transition:transform .2s; font-size:.85rem; }
+.sec.coll .chevron { transform:rotate(-90deg); }
+.sec.coll .sec-bd { display:none; }
+.sec-bd { padding:20px; }
+
+/* ═══════════════════════════════ CONTENT COMPONENTS ═══════════════════════════════ */
+
+/* Definition box */
+.def-box { background:linear-gradient(135deg,#f0f5ff,#e8f2ff); border-left:4px solid var(--c-blue); border-radius:0 8px 8px 0; padding:15px 17px; margin-bottom:13px; }
+.def-lbl { font-size:.66rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--c-blue); margin-bottom:4px; }
+.def-box p { font-size:.91rem; }
+.def-box strong { color:var(--navy); }
+
+/* Grids */
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+
+/* Generic coloured card */
+.card-g { border-radius:8px; padding:16px; border:1px solid; }
+.cg-plan  { background:#f0fdf4; border-color:#bbf7d0; }
+.cg-org   { background:#eff6ff; border-color:#bfdbfe; }
+.cg-lead  { background:#fefce8; border-color:#fde68a; }
+.cg-ctrl  { background:#fff1f2; border-color:#fecdd3; }
+.cg-inc   { background:#eff6ff; border-color:#bfdbfe; }
+.cg-acc   { background:#fff1f2; border-color:#fecdd3; }
+.cg-near  { background:#fefce8; border-color:#fde68a; }
+.cg-safe  { background:#f0fdf4; border-color:#bbf7d0; }
+.cg-type  { background:#f5f3ff; border-color:#c4b5fd; }
+.card-g h4 { font-size:.87rem; font-weight:700; margin-bottom:7px; display:flex; align-items:center; gap:7px; }
+.card-g p  { font-size:.84rem; color:#444; line-height:1.6; }
+.card-g ul { font-size:.84rem; color:#444; line-height:1.6; padding-left:16px; }
+.card-g li { margin-bottom:3px; }
+
+/* Colour-label shortcuts */
+.clr-gr { color:var(--c-green); }
+.clr-bl { color:var(--c-blue); }
+.clr-go { color:var(--c-gold-s); }
+.clr-ro { color:var(--c-rose); }
+.clr-pu { color:var(--c-purple); }
+.clr-te { color:var(--c-teal); }
+.clr-or { color:var(--c-orange); }
+
+.f-badge { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; color:#fff; flex-shrink:0; }
+.bg-gr { background:var(--c-green); }
+.bg-bl { background:var(--c-blue); }
+.bg-go { background:var(--c-gold-s); }
+.bg-ro { background:var(--c-rose); }
+.bg-or { background:var(--c-orange); }
+.bg-pu { background:var(--c-purple); }
+
+/* Tip / warn / quote boxes */
+.tip-box  { margin-top:12px; padding:10px 14px; background:#f8f9fa; border-radius:8px; font-size:.82rem; color:#555; }
+.warn-box { margin-top:12px; padding:12px 16px; background:#fef9ec; border:1px solid #fde68a; border-radius:8px; font-size:.84rem; color:#6b4a10; }
+.warn-box strong { color:#92400e; }
+.info-box { margin-top:12px; padding:12px 16px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; font-size:.84rem; color:#1e3a5f; }
+.quote-note { margin-top:12px; padding:12px 16px; background:#fef9ec; border-left:3px solid var(--gold); border-radius:0 8px 8px 0; font-size:.84rem; color:#6b4a10; font-style:italic; }
+
+/* Performance comparison */
+.p-card { border-radius:8px; padding:17px; }
+.p-eff  { background:#f0fdf4; border:1.5px solid #86efac; }
+.p-efcy { background:#eff6ff; border:1.5px solid #93c5fd; }
+.p-card h4 { font-size:.95rem; font-weight:700; margin-bottom:6px; }
+.p-eff  h4 { color:var(--c-green); }
+.p-efcy h4 { color:var(--c-blue); }
+.p-tag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:.71rem; font-weight:700; margin-bottom:8px; }
+.p-eff  .p-tag { background:#dcfce7; color:var(--c-green); }
+.p-efcy .p-tag { background:#dbeafe; color:var(--c-blue); }
+.p-card p { font-size:.84rem; color:#444; line-height:1.55; }
+
+/* Hierarchy */
+.hier { display:flex; flex-direction:column; }
+.h-lvl { display:flex; align-items:stretch; gap:13px; }
+.h-bar { width:4px; border-radius:3px; flex-shrink:0; }
+.h-top   .h-bar { background:#7c3aed; }
+.h-mid   .h-bar { background:var(--c-blue); }
+.h-first .h-bar { background:var(--c-green); }
+.h-body { flex:1; padding:14px 0 17px; border-bottom:1px dashed var(--cream-dk); }
+.h-lvl:last-child .h-body { border-bottom:none; }
+.h-title { font-weight:700; font-size:.91rem; margin-bottom:2px; }
+.h-top   .h-title { color:#7c3aed; }
+.h-mid   .h-title { color:var(--c-blue); }
+.h-first .h-title { color:var(--c-green); }
+.h-eg { font-family:var(--font-m); font-size:.71rem; color:var(--muted); margin-bottom:4px; }
+.h-desc { font-size:.84rem; color:#444; line-height:1.55; }
+
+/* Skills */
+.sk-card { border-radius:8px; padding:16px; text-align:center; }
+.sk-c { background:#f5f3ff; border:1.5px solid #c4b5fd; }
+.sk-h { background:#fff1f2; border:1.5px solid #fda4af; }
+.sk-t { background:#f0fdf4; border:1.5px solid #86efac; }
+.sk-ico { font-size:1.6rem; margin-bottom:8px; }
+.sk-card h4 { font-size:.86rem; font-weight:700; margin-bottom:7px; }
+.sk-c h4 { color:#6d28d9; }
+.sk-h h4 { color:#be123c; }
+.sk-t h4 { color:var(--c-green); }
+.sk-card p { font-size:.8rem; color:#555; line-height:1.55; }
+.sk-tag { display:inline-block; margin-top:8px; padding:3px 10px; border-radius:20px; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+.sk-c .sk-tag { background:#ede9fe; color:#6d28d9; }
+.sk-h .sk-tag { background:#ffe4e6; color:#be123c; }
+.sk-t .sk-tag { background:#dcfce7; color:var(--c-green); }
+
+/* Matrix */
+.matrix { background:var(--cream); border-radius:8px; overflow:hidden; border:1px solid var(--cream-dk); font-size:.79rem; margin-bottom:7px; }
+.m-row { display:grid; grid-template-columns:1.5fr 1fr 1fr 1fr; }
+.m-row.hd { background:var(--navy); color:rgba(255,255,255,.8); }
+.m-cell { padding:9px 12px; border-right:1px solid var(--cream-dk); border-bottom:1px solid var(--cream-dk); display:flex; align-items:center; justify-content:center; }
+.m-cell:first-child { justify-content:flex-start; font-weight:600; }
+.m-row:last-child .m-cell { border-bottom:none; }
+.m-cell:last-child { border-right:none; }
+.hd .m-cell { font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; font-weight:700; border-color:rgba(255,255,255,.07); }
+.dot-row { display:flex; gap:3px; }
+.d { width:8px; height:8px; border-radius:50%; }
+.d.on { background:var(--navy); }
+.d.off { background:#ccc; }
+
+/* Why / checklist list */
+.why-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
+.why-list li { display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:var(--cream); border-radius:8px; font-size:.86rem; }
+.why-chk { width:20px; height:20px; background:var(--navy); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:.6rem; flex-shrink:0; margin-top:2px; }
+
+/* Numbered steps */
+.steps { display:flex; flex-direction:column; gap:10px; }
+.step { display:flex; gap:13px; align-items:flex-start; }
+.step-num { width:28px; height:28px; border-radius:50%; background:var(--navy); color:#fff; font-size:.78rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+.step-body { flex:1; }
+.step-body h5 { font-size:.88rem; font-weight:700; color:var(--navy); margin-bottom:3px; }
+.step-body p  { font-size:.83rem; color:#555; line-height:1.55; }
+
+/* Tag pill */
+.pill { display:inline-block; padding:3px 10px; border-radius:20px; font-size:.72rem; font-weight:700; margin-right:4px; }
+.pill-bl { background:#dbeafe; color:var(--c-blue); }
+.pill-gr { background:#dcfce7; color:var(--c-green); }
+.pill-ro { background:#ffe4e6; color:var(--c-rose); }
+.pill-go { background:#fef3c7; color:var(--c-gold-s); }
+.pill-or { background:#ffedd5; color:var(--c-orange); }
+.pill-pu { background:#ede9fe; color:var(--c-purple); }
+
+/* Reference box */
+.ref-box { margin-top:20px; padding:12px 16px; background:var(--white); border-radius:8px; border:1px solid var(--cream-dk); font-size:.78rem; color:#888; }
+
+/* ═══════════════════════════════ MINDMAP ═══════════════════════════════ */
+.mm-wrap { background:var(--white); border:1px solid var(--cream-dk); border-radius:var(--r); overflow:hidden; }
+.mm-banner { padding:12px 20px; background:var(--cream); border-bottom:1px solid var(--cream-dk); font-size:.8rem; color:var(--muted); display:flex; align-items:center; gap:8px; }
+.mm-banner b { color:var(--navy); }
+.mm-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.mm-scroll svg { min-width:680px; width:100%; display:block; }
+.mm-node { cursor:pointer; }
+.mm-node text { transition:opacity .13s; }
+.mm-node:hover text { opacity:.7; }
+.mm-hint { padding:9px 20px; background:var(--cream); border-top:1px solid var(--cream-dk); font-size:.76rem; color:var(--muted); text-align:center; }
+
+/* ═══════════════════════════════ FLASHCARDS ═══════════════════════════════ */
+.fc-grid { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+.fc-hd { font-family:var(--font-d); font-size:1rem; color:var(--navy); margin:0 0 11px; padding-bottom:7px; border-bottom:2px solid var(--cream-dk); }
+.fc-sec { margin-bottom:24px; }
+.flip-card { background:var(--white); border-radius:10px; border:1.5px solid var(--cream-dk); cursor:pointer; min-height:110px; perspective:600px; transition:box-shadow .18s; }
+.flip-card:hover { box-shadow:0 4px 12px rgba(0,0,0,.07); }
+.flip-in { width:100%; min-height:110px; position:relative; transform-style:preserve-3d; transition:transform .4s ease; }
+.flip-card.flipped .flip-in { transform:rotateY(180deg); }
+.fc-f,.fc-b { position:absolute; top:0; left:0; width:100%; min-height:110px; padding:15px; border-radius:8px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; flex-direction:column; justify-content:center; }
+.fc-f { background:var(--white); }
+.fc-b { background:var(--navy); transform:rotateY(180deg); }
+.fc-lbl { font-size:.65rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.fc-q { font-weight:600; font-size:.86rem; color:var(--navy); line-height:1.5; }
+.fc-tip { margin-top:6px; font-size:.68rem; color:var(--muted); }
+.fc-a { font-size:.84rem; color:rgba(255,255,255,.87); line-height:1.6; }
+.fc-a strong { color:var(--gold-lt); }
+
+/* ═══════════════════════════════ HOME PAGE ═══════════════════════════════ */
+.home-hero { background:linear-gradient(130deg,var(--navy) 0%,#253659 100%); border-radius:var(--r); padding:42px 36px; color:#fff; position:relative; overflow:hidden; margin-bottom:26px; }
+.home-hero::before { content:'📖'; position:absolute; right:32px; top:22px; font-size:4.5rem; opacity:.1; }
+.home-hero h1 { font-family:var(--font-d); font-size:2.1rem; margin-bottom:9px; line-height:1.2; }
+.home-hero p { color:rgba(255,255,255,.58); font-size:.93rem; max-width:450px; }
+.stats { display:flex; gap:24px; margin-top:24px; }
+.stat-n { font-family:var(--font-d); font-size:1.8rem; color:var(--gold-lt); }
+.stat-l { font-size:.73rem; color:rgba(255,255,255,.4); text-transform:uppercase; letter-spacing:.08em; }
+.home-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.home-card { background:var(--white); border:1px solid var(--cream-dk); border-radius:var(--r); padding:20px; cursor:pointer; transition:all .18s; display:block; color:inherit; }
+.home-card:hover { border-color:var(--navy); transform:translateY(-2px); box-shadow:0 5px 16px rgba(27,42,74,.1); }
+.home-card.dim { opacity:.44; cursor:default; }
+.home-card.dim:hover { transform:none; box-shadow:none; border-color:var(--cream-dk); }
+.hc-tag { font-size:.66rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
+.home-card h3 { font-family:var(--font-d); font-size:.98rem; color:var(--navy); margin-bottom:4px; }
+.home-card p { font-size:.79rem; color:var(--muted); }
+
+/* ═══════════════════════════════ MAINTENANCE GUIDE ═══════════════════════════════ */
+.guide-sec { background:var(--white); border:1px solid var(--cream-dk); border-radius:var(--r); margin-bottom:20px; overflow:hidden; }
+.guide-hd { padding:14px 20px; background:var(--cream); border-bottom:1px solid var(--cream-dk); display:flex; align-items:center; gap:9px; }
+.guide-hd h3 { font-weight:700; color:var(--navy); font-size:.93rem; }
+.guide-bd { padding:20px; }
+.guide-bd p,.guide-bd li { font-size:.86rem; color:var(--text); line-height:1.7; margin-bottom:7px; }
+.guide-bd ul,.guide-bd ol { padding-left:18px; margin-bottom:10px; }
+.guide-bd h4 { font-size:.88rem; font-weight:700; color:var(--navy); margin:14px 0 7px; }
+.guide-bd h4:first-child { margin-top:0; }
+pre { background:#1e2a3a; color:#e2e8f0; border-radius:8px; padding:14px; font-family:var(--font-m); font-size:.76rem; line-height:1.6; overflow-x:auto; margin:9px 0 13px; white-space:pre; }
+code { font-family:var(--font-m); font-size:.8rem; background:var(--cream-dk); padding:2px 5px; border-radius:4px; color:var(--c-rose); }
+.rule-list { list-style:none; padding:0; display:flex; flex-direction:column; gap:7px; }
+.rule-list li { display:flex; gap:9px; align-items:flex-start; padding:10px 13px; background:var(--cream); border-radius:8px; font-size:.84rem; border-left:3px solid var(--gold); }
+.rule-num { font-family:var(--font-m); font-size:.7rem; font-weight:700; color:var(--gold); flex-shrink:0; padding-top:2px; }
+.color-ref { display:grid; grid-template-columns:repeat(auto-fill,minmax(165px,1fr)); gap:9px; }
+.color-chip { border-radius:8px; overflow:hidden; border:1px solid var(--cream-dk); }
+.chip-sw { height:32px; }
+.chip-info { padding:7px 9px; font-size:.76rem; }
+.chip-name { font-weight:700; color:var(--navy); }
+.chip-var  { font-family:var(--font-m); font-size:.68rem; color:var(--muted); }
+
+/* ═══════════════════════════════ MOBILE ═══════════════════════════════ */
+@media(max-width:780px) {
+  .hamburger { display:flex; }
+  #sidebar { transform:translateX(-100%); }
+  #sidebar.open { transform:translateX(0); }
+  #main { margin-left:0; }
+  .pg { padding:18px 14px 60px; }
+  #topbar { padding:12px 14px; padding-left:54px; }
+  .g2,.g3,.fc-grid,.home-grid { grid-template-columns:1fr; }
+  .hero { padding:22px; }
+  .hero h1 { font-size:1.45rem; }
+  .m-row { font-size:.7rem; }
+}
+</style>
+</head>
+<body>
+
+<button class="hamburger" onclick="toggleSb()" aria-label="Menu">☰</button>
+<div id="mm-tip"><div class="tip-head" id="mm-tip-head"></div><div class="tip-body" id="mm-tip-body"></div></div>
+
+<!-- ══════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════ -->
+<nav id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo">My Study Notes</div>
+    <div class="sb-tag">Personal Quick-Reference</div>
+  </div>
+  <div class="sb-search">
+    <input type="search" id="q" placeholder="Search topics…" oninput="doSearch(this.value)" autocomplete="off">
+  </div>
+
+  <div class="sb-body">
+  <div class="sb-sec">
+    <div class="sb-lbl">Overview</div>
+    <div class="sb-links">
+      <div class="sb-link active" onclick="nav('home',this)"><span class="sb-dot"></span>Home</div>
+    </div>
+  </div>
+
+  <!-- ── GENERATED: course sections injected here by build.py ── -->
+{{SIDEBAR_SECTIONS}}
+  </div>
+
+  <div class="sb-footer">
+    <div class="sb-links">
+      <div class="sb-link" onclick="nav('guide',this)"><span style="font-size:.88rem">⚙</span>&nbsp;Maintenance Guide</div>
+    </div>
+    <a class="sb-github" href="https://github.com/MAb839N" target="_blank" rel="noopener" aria-label="GitHub: MAb839N">
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      Muhd Aiman — MAb839N
+    </a>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     MAIN
+══════════════════════════════════════════ -->
+<div id="main">
+  <div id="topbar">
+    <div class="bc" id="bc">Home</div>
+    <div class="tb-modes" id="tb-modes" style="display:none">
+      <button class="tb-btn on"  id="btn-notes" onclick="setMode('notes')">📋 Notes</button>
+      <button class="tb-btn"     id="btn-mm"    onclick="setMode('mm')">🗺 Mindmap</button>
+      <button class="tb-btn"     id="btn-fc"    onclick="setMode('fc')">🃏 Flashcards</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: HOME ══ -->
+  <div class="page on" id="page-home">
+    <div class="pg">
+      <div class="home-hero">
+        <h1>Your Digital Study Hub</h1>
+        <p>All course notes, organised, searchable, and study-ready. Select any module from the sidebar.</p>
+        <div class="stats">
+{{HOME_STATS}}
+        </div>
+      </div>
+      <div class="home-grid">
+{{HOME_CARDS}}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── GENERATED: module pages injected here by build.py ── -->
+{{MODULE_PAGES}}
+
+  <!-- ══ PAGE: MAINTENANCE GUIDE ══ -->
+  <div class="page" id="page-guide">
+    <div class="pg">
+      <div class="hero">
+        <div class="hero-tag">Site Reference</div>
+        <h1>⚙ Maintenance Guide</h1>
+        <p>Rules, workflow, and templates for expanding this site — for you or any AI assistant.</p>
+      </div>
+
+      <!-- PROJECT STRUCTURE -->
+      <div class="guide-sec">
+        <div class="guide-hd"><span>🗂</span><h3>Project Structure</h3></div>
+        <div class="guide-bd">
+          <p>This is a <strong>build-based static site</strong>. You never edit <code>study-notes.html</code> directly. The workflow is:</p>
+<pre>project/
+├── build.py          ← run this to rebuild
+├── template.html     ← shell: CSS + JS only. Rarely changed.
+├── modules/
+│   ├── pom-t1.md     ← one file per module (AI-generated)
+│   ├── rop-w1.md
+│   └── ...
+├── AI_MODULE_GUIDE.md  ← rules for AI generating new modules
+└── study-notes.html  ← FINAL OUTPUT. Share/sync this file.</pre>
+          <p><strong>To add a new module:</strong> create a <code>.md</code> file in <code>modules/</code>, run <code>python build.py</code>. That is the entire workflow.</p>
+          <p><strong>To rebuild:</strong> <code>python build.py</code> (Windows) or <code>python3 build.py</code> (macOS/Linux). Zero install required.</p>
+        </div>
+      </div>
+
+      <!-- RULES -->
+      <div class="guide-sec">
+        <div class="guide-hd"><span>📜</span><h3>Established Rules &amp; Requirements</h3></div>
+        <div class="guide-bd">
+          <p>These rules govern all content. Preserve them in all AI prompts and future edits:</p>
+          <ul class="rule-list">
+            <li><span class="rule-num">R1</span><span><strong>No institution names or course codes.</strong> Use course titles and short forms only (e.g. "Principles of Management (POM)").</span></li>
+            <li><span class="rule-num">R2</span><span><strong>Mindmap required per topic.</strong> Every module must include an interactive SVG mindmap. Each node links to its section via <code>onclick="goSec('section-id','page-id')"</code>.</span></li>
+            <li><span class="rule-num">R3</span><span><strong>Zero external dependencies.</strong> No CDN fonts, no remote scripts. The output HTML must work fully <strong>offline</strong> in any major browser.</span></li>
+            <li><span class="rule-num">R4</span><span><strong>This maintenance page must always exist</strong> and be consulted before any modification.</span></li>
+            <li><span class="rule-num">R5</span><span><strong>All facts must be exact and correct.</strong> Do not paraphrase definitions loosely. Accuracy matters for study use.</span></li>
+            <li><span class="rule-num">R6</span><span><strong>Expandable by design.</strong> New modules are added via the build pipeline — never by hand-editing <code>study-notes.html</code>.</span></li>
+            <li><span class="rule-num">R7</span><span><strong>Three study modes per topic:</strong> Notes (collapsible sections), Mindmap (interactive SVG), Flashcards (flip cards). All three required.</span></li>
+            <li><span class="rule-num">R8</span><span><strong>Consistent colour coding.</strong> blue=definitions, green=functions/processes, gold=steps/examples, rose=warnings/skills, purple=structure, teal=rationale/why, orange=types, slate=summary.</span></li>
+            <li><span class="rule-num">R9</span><span><strong>System fonts only.</strong> Font stack: <code>--font-d</code> (Palatino/Georgia), <code>--font-b</code> (Segoe UI/system-ui), <code>--font-m</code> (Consolas/Courier New).</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- MODULE FILE FORMAT -->
+      <div class="guide-sec">
+        <div class="guide-hd"><span>📄</span><h3>Module File Format (modules/*.md)</h3></div>
+        <div class="guide-bd">
+          <p>Each module file has three parts separated by markers. See <code>AI_MODULE_GUIDE.md</code> for the full schema — always pass that file to the AI when generating new content.</p>
+<pre>---
+id: course-label            ← e.g. pom-t1, rop-w2 (lowercase, no spaces)
+course: POM                 ← short course code
+course-full: Principles of Management
+label: Lesson 1             ← shown in sidebar and breadcrumb
+title: Introduction to...   ← shown in hero and home card
+description: One sentence summary.
+reference: "Author (Year). Title. Publisher."  ← optional
+pills:
+  - Section Title | section-id    ← quick-jump buttons in hero
+  - Another Section | another-id
+---
+
+&lt;!-- NOTES --&gt;
+&lt;section id="sec-id" icon="📌" color="blue" title="Section Title" num="1"&gt;
+  &lt;!-- Section body HTML here --&gt;
+&lt;/section&gt;
+
+&lt;!-- MINDMAP --&gt;
+&lt;svg viewBox="0 0 1000 500" ...&gt; ... &lt;/svg&gt;
+
+&lt;!-- FLASHCARDS --&gt;
+&lt;div class="fc-sec"&gt; ... &lt;/div&gt;</pre>
+          <p><strong>Section color values:</strong> <code>blue</code> · <code>green</code> · <code>gold</code> · <code>rose</code> · <code>purple</code> · <code>teal</code> · <code>orange</code> · <code>slate</code></p>
+          <p><strong>Critical:</strong> Never use <code>&lt;/section&gt;</code> inside section content — it will break the build parser.</p>
+        </div>
+      </div>
+
+      <!-- TEMPLATES -->
+      <div class="guide-sec">
+        <div class="guide-hd"><span>🧩</span><h3>Component Templates</h3></div>
+        <div class="guide-bd">
+          <h4>Definition box</h4>
+<pre>&lt;div class="def-box"&gt;
+  &lt;div class="def-lbl"&gt;Core Definition&lt;/div&gt;
+  &lt;p&gt;&lt;strong&gt;Term&lt;/strong&gt; is the definition.&lt;/p&gt;
+&lt;/div&gt;</pre>
+          <h4>2-column / 3-column grid</h4>
+<pre>&lt;div class="g2"&gt;  &lt;!-- or g3 for 3 columns --&gt;
+  &lt;div class="card-g cg-plan"&gt;
+    &lt;h4&gt;&lt;span class="f-badge bg-gr"&gt;P&lt;/span&gt;&lt;span class="clr-gr"&gt;Planning&lt;/span&gt;&lt;/h4&gt;
+    &lt;p&gt;Card content.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+          <h4>Flip flashcard</h4>
+<pre>&lt;div class="flip-card" onclick="this.classList.toggle('flipped')"&gt;
+  &lt;div class="flip-in"&gt;
+    &lt;div class="fc-f"&gt;
+      &lt;div class="fc-lbl"&gt;Label&lt;/div&gt;
+      &lt;div class="fc-q"&gt;Question?&lt;/div&gt;
+      &lt;div class="fc-tip"&gt;Tap to reveal ↗&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="fc-b"&gt;
+      &lt;div class="fc-a"&gt;Answer with &lt;strong&gt;key terms&lt;/strong&gt;.&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+          <h4>Mindmap SVG node + branch</h4>
+<pre>&lt;!-- Branch path --&gt;
+&lt;path d="M fromX fromY C cp1X cp1Y, cp2X cp2Y, toX toY"
+      fill="none" stroke="#COLOR" stroke-width="4" stroke-linecap="round"/&gt;
+
+&lt;!-- Clickable label node --&gt;
+&lt;g class="mm-node" onclick="goSec('section-id','page-id')"
+   onmouseenter="showTip('Heading','Tooltip text')" onmouseleave="hideTip()"&gt;
+  &lt;rect x="X" y="Y" width="W" height="H" rx="4" fill="rgba(R,G,B,.09)"/&gt;
+  &lt;text x="TX" y="TY" text-anchor="start" fill="#COLOR"
+        font-family="Arial,sans-serif" font-size="12.5" font-weight="700"&gt;Label&lt;/text&gt;
+&lt;/g&gt;</pre>
+          <p>SVG viewBox: <code>0 0 1000 500</code>. Centre node: ~<code>(490, 250)</code>. Left nodes: <code>text-anchor="end"</code>. Right nodes: <code>text-anchor="start"</code>. Main branches <code>stroke-width="4"</code>, sub-branches <code>stroke-width="2"</code>.</p>
+        </div>
+      </div>
+
+      <!-- COLOUR REFERENCE -->
+      <div class="guide-sec">
+        <div class="guide-hd"><span>🎨</span><h3>Colour Reference</h3></div>
+        <div class="guide-bd">
+          <p>All colours defined as CSS variables in <code>:root</code> in <code>template.html</code>. Never hard-code hex values — always use <code>var(--name)</code>.</p>
+          <div class="color-ref">
+            <div class="color-chip"><div class="chip-sw" style="background:#1b2a4a"></div><div class="chip-info"><div class="chip-name">Navy / Primary</div><div class="chip-var">--navy</div></div></div>
+            <div class="color-chip"><div class="chip-sw" style="background:#c9933a"></div><div class="chip-info"><div class="chip-name">Gold / Accent</div><div class="chip-var">--gold</div></div></div>
+            <div class="color-chip"><div class="chip-sw" style="background:#f7f2eb"></div><div class="chip-info"><div class="chip-name">Cream / Background</div><div class="chip-var">--cream</div></div></div>
+            <div class="color-chip"><div class="chip-sw" style="background:#2a5f9b"></div><div class="chip-info"><div class="chip-name">Blue / Definitions</div><div class="chip-var">--c-blue</div></div></div>
+            <div class="color-chip"><div class="chip-sw" style="background:#2d7a5f"></div><div class="chip-info"><div class="chip-name">Green / Processes</div><div class="chip-var">--c-green</div></div></div>
+            <div class="color-chip"><div class="chip-sw" style="background:#9b3a4a"></div><div class="chip-info"><div class="chip-name">Rose / Warnings</div><div class="chip-var">--c-rose</div></div></div>
+            <div class="color-chip"><div class="chip-sw" style="background:#5a3a8a"></div><div class="chip-info"><div class="chip-name">Purple / Structure</div><div class="chip-var">--c-purple</div></div></div>
+            <div class="color-chip"><div class="chip-sw" style="background:#2a8a80"></div><div class="chip-info"><div class="chip-name">Teal / Rationale</div><div class="chip-var">--c-teal</div></div></div>
+            <div class="color-chip"><div class="chip-sw" style="background:#b85c20"></div><div class="chip-info"><div class="chip-name">Orange / Types</div><div class="chip-var">--c-orange</div></div></div>
+            <div class="color-chip"><div class="chip-sw" style="background:#3a5068"></div><div class="chip-info"><div class="chip-name">Slate / Summary</div><div class="chip-var">--c-slate</div></div></div>
+          </div>
+          <h4 style="margin-top:14px">Section icon background classes</h4>
+          <p><code>ico-blue</code> · <code>ico-green</code> · <code>ico-gold</code> · <code>ico-rose</code> · <code>ico-purple</code> · <code>ico-teal</code> · <code>ico-orange</code> · <code>ico-slate</code></p>
+        </div>
+      </div>
+
+      <!-- QUICK TIPS -->
+      <div class="guide-sec">
+        <div class="guide-hd"><span>💬</span><h3>Quick Tips</h3></div>
+        <div class="guide-bd">
+          <ul>
+            <li>Sidebar search filters visible <code>.sec</code> blocks by text and auto-expands matches. It only searches the currently active page.</li>
+            <li>When drawing a new mindmap: sketch on paper first. ViewBox is <code>0 0 1000 500</code>. Centre node near <code>(490, 250)</code>. Use cubic Bezier paths (<code>C</code>) for smooth curves.</li>
+            <li>Flashcard flip is CSS-only — use the <code>flip-card / flip-in / fc-f / fc-b</code> structure. No JS needed per card.</li>
+            <li>The <code>goSec(sectionId, pageId)</code> function: switches to Notes mode, then scrolls to and flashes the target section. Always pass both arguments.</li>
+            <li>Module files are sorted alphabetically from the <code>modules/</code> folder. Name files consistently: <code>pom-t1.md</code>, <code>pom-t2.md</code>, <code>rop-w1.md</code>.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /pg -->
+  </div><!-- /page-guide -->
+
+</div><!-- /#main -->
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+/* ── GENERATED DATA (injected by build.py) ── */
+var topicModes = {
+{{TOPIC_MODES}}
+};
+var breadcrumbLabels = {
+{{BREADCRUMB_LABELS}}
+};
+var pageToCourse = {
+{{PAGE_TO_COURSE}}
+};
+
+/* ── STATE ── */
+var curPage = 'home';
+var curMode = 'notes';
+
+/* ── INTERNAL: update all page UI state ── */
+function _switchPage(pageId, sidebarEl, mode) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+  document.getElementById('page-' + pageId).classList.add('on');
+  curPage = pageId;
+
+  document.querySelectorAll('.sb-link').forEach(function(l){ l.classList.remove('active'); });
+  if (sidebarEl) sidebarEl.classList.add('active');
+
+  document.getElementById('bc').innerHTML = breadcrumbLabels[pageId] || pageId;
+
+  var modes   = topicModes[pageId] || [];
+  var tbModes = document.getElementById('tb-modes');
+  tbModes.style.display = modes.length > 1 ? 'flex' : 'none';
+
+  var btnMm = document.getElementById('btn-mm');
+  var btnFc = document.getElementById('btn-fc');
+  if (btnMm) btnMm.style.display = modes.indexOf('mm') > -1 ? '' : 'none';
+  if (btnFc) btnFc.style.display = modes.indexOf('fc') > -1 ? '' : 'none';
+
+  if (modes.length > 1) setMode(mode || curMode);
+
+  if (window.innerWidth <= 780) document.getElementById('sidebar').classList.remove('open');
+  openCourseFor(pageId);
+}
+
+/* ── PAGE NAVIGATION (sidebar clicks) ── */
+function nav(pageId, el, mode) {
+  _switchPage(pageId, el, mode);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── MODE SWITCH (Notes / Mindmap / Flashcards) ── */
+function setMode(m) {
+  curMode = m;
+  var modes = ['notes','mm','fc'];
+  modes.forEach(function(id) {
+    var el = document.getElementById(curPage + '-' + id);
+    if (el) el.style.display = (id === m) ? '' : 'none';
+  });
+  document.querySelectorAll('.tb-btn').forEach(function(b){ b.classList.remove('on'); });
+  var btn = document.getElementById('btn-' + m);
+  if (btn) btn.classList.add('on');
+}
+
+/* ── MINDMAP → NOTES NAVIGATION ── */
+function goSec(sId, pageId) {
+  var sidebarEl = document.querySelector('.sb-link[onclick*="\'' + pageId + '\'"]');
+  _switchPage(pageId, sidebarEl, 'notes');
+  setTimeout(function() {
+    var el = document.getElementById(sId);
+    if (!el) return;
+    el.classList.remove('coll');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.remove('flash');
+    void el.offsetWidth;
+    el.classList.add('flash');
+    setTimeout(function(){ el.classList.remove('flash'); }, 1600);
+  }, 90);
+}
+
+/* ── MINDMAP TOOLTIP ── */
+var mmTip = null, mmTipHead = null, mmTipBody = null;
+function initTip() {
+  if (mmTip) return;
+  mmTip = document.getElementById('mm-tip');
+  mmTipHead = document.getElementById('mm-tip-head');
+  mmTipBody = document.getElementById('mm-tip-body');
+  document.addEventListener('mousemove', function(e) {
+    if (!mmTip || mmTip.style.display === 'none') return;
+    var x = e.clientX + 16, y = e.clientY + 12;
+    if (x + 230 > window.innerWidth) x = e.clientX - 240;
+    if (y + 90 > window.innerHeight) y = e.clientY - 90;
+    mmTip.style.left = x + 'px';
+    mmTip.style.top  = y + 'px';
+  });
+}
+function showTip(head, body) {
+  initTip();
+  mmTipHead.textContent = head;
+  mmTipBody.textContent = body;
+  mmTip.style.display = 'block';
+}
+function hideTip() {
+  if (mmTip) mmTip.style.display = 'none';
+}
+
+/* ── SECTION COLLAPSE TOGGLE ── */
+function toggleSec(id) {
+  document.getElementById(id).classList.toggle('coll');
+}
+
+/* ── SIDEBAR SEARCH (scoped to current page only) ── */
+function doSearch(val) {
+  var q    = val.trim().toLowerCase();
+  var secs = document.querySelectorAll('#page-' + curPage + ' .sec');
+  if (!q) {
+    secs.forEach(function(s){ s.style.display = ''; });
+    return;
+  }
+  secs.forEach(function(s) {
+    var match = s.textContent.toLowerCase().indexOf(q) > -1;
+    s.style.display = match ? '' : 'none';
+    if (match) s.classList.remove('coll');
+  });
+}
+
+/* ── COURSE COLLAPSE ── */
+function toggleCourse(el) {
+  var sec = el.closest('.sb-course');
+  var isCollapsed = sec.classList.contains('collapsed');
+  document.querySelectorAll('.sb-course').forEach(function(s){ s.classList.add('collapsed'); });
+  if (isCollapsed) sec.classList.remove('collapsed');
+}
+function openCourseFor(pageId) {
+  var courseId = pageToCourse[pageId];
+  if (!courseId) return;
+  document.querySelectorAll('.sb-course').forEach(function(s){ s.classList.add('collapsed'); });
+  var target = document.querySelector('.sb-course[data-course="' + courseId + '"]');
+  if (target) target.classList.remove('collapsed');
+}
+
+/* ── MOBILE SIDEBAR ── */
+function toggleSb() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  var sb = document.getElementById('sidebar');
+  if (window.innerWidth <= 780 && sb.classList.contains('open')) {
+    if (!sb.contains(e.target) && !e.target.closest('.hamburger')) {
+      sb.classList.remove('open');
+    }
+  }
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') document.getElementById('sidebar').classList.remove('open');
+});
+</script>
+</body>
+</html>
