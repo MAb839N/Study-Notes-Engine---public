@@ -1,6 +1,6 @@
 # ─── PERSONAL CONTENT — NEVER PUBLISH ───────────────────────────────────────
 # Block the entire modules folder, except sample files
-modules/
+modules/*
 !modules/sample-*.md
 
 # Block the generated output — personal and rebuilt locally
