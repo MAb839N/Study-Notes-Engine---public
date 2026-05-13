@@ -20,6 +20,8 @@ Running one command (`python3 build.py`) reads all `.md` files in the `modules/`
 
 The generated HTML file works completely offline. Sync it to any device and open in any browser.
 
+See [AI_MODULE_GUIDE.md](./AI_MODULE_GUIDE.md) for the full module authoring specification.
+
 ---
 
 ## Project structure
